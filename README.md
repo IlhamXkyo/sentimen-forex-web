@@ -7,7 +7,6 @@
 
 Aplikasi web real-time untuk melihat sentimen pasar forex dan emas berdasarkan analisis berita finansial. Menampilkan persentase BUY/SELL/SIDEWAYS untuk berbagai pair forex.
 
-![Preview](preview.png)
 
 ## 📋 Daftar Isi
 - [Fitur](#fitur)
@@ -38,7 +37,7 @@ Aplikasi web real-time untuk melihat sentimen pasar forex dan emas berdasarkan a
 ## 🎥 Demo
 
 ### Tampilan Utama
-![Main View](https://via.placeholder.com/800x400?text=Market+Sentiment+Main+View)
+![Main View](preview.png)
 
 ### Detail Pair
 ![Detail View](https://via.placeholder.com/800x400?text=Pair+Detail+View)
