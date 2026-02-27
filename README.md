@@ -350,7 +350,7 @@ heroku config:set ALPHA_VANTAGE_KEY=your_key
 
 ## 📝 Catatan Rilis
 
-### v1.0.0 (2024-01-15)
+### v1.0.0 (2026/02/27)
 - Rilis pertama
 - Fitur dasar sentiment analysis
 - Support 8 pair forex
