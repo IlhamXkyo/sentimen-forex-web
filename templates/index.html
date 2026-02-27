@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Sentiment - Forex & Gold</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #0a0b0e;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: rgba(18, 22, 33, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2a2f3a;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .update-time {
+            font-size: 0.9rem;
+            color: #8a8f99;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .live-badge {
+            background: #2a5c4a;
+            color: #4ade80;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        /* Header */
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #b0b5c0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            color: #8a8f99;
+            font-size: 1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #14181f;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #2a2f3a;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b4050;
+        }
+        
+        .stat-label {
+            color: #8a8f99;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .stat-trend {
+            color: #4ade80;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Market Grid */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .market-card {
+            background: #14181f;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #2a2f3a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .market-card:hover {
+            transform: translateY(-4px);
+            border-color: #4a9eff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .pair-info h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .pair-info .pair-name {
+            color: #8a8f99;
+            font-size: 0.9rem;
+        }
+        
+        .price {
+            text-align: right;
+        }
+        
+        .price-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .price-change {
+            font-size: 0.9rem;
+            color: #4ade80;
+        }
+        
+        /* Sentiment Bars */
+        .sentiment-container {
+            margin: 1.5rem 0;
+        }
+        
+        .sentiment-bar {
+            height: 8px;
+            border-radius: 4px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .bar-buy {
+            background: #4ade80;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .bar-sell {
+            background: #f87171;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .bar-sideways {
+            background: #fbbf24;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .sentiment-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .label-buy {
+            color: #4ade80;
+        }
+        
+        .label-sell {
+            color: #f87171;
+        }
+        
+        .label-sideways {
+            color: #fbbf24;
+        }
+        
+        /* Direction Badge */
+        .direction-badge {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+        
+        .badge-bullish {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+        
+        .badge-bearish {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        
+        .badge-neutral {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        
+        /* News Ticker */
+        .news-ticker {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #2a2f3a;
+            font-size: 0.9rem;
+            color: #8a8f99;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .ticker-content {
+            display: inline-block;
+            animation: ticker 20s linear infinite;
+        }
+        
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: #8a8f99;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #2a2f3a;
+            border-top: 3px solid #4a9eff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Modal Detail */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: #14181f;
+            border-radius: 24px;
+            border: 1px solid #2a2f3a;
+            padding: 2rem;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #8a8f99;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: white;
+        }
+        
+        /* Articles List */
+        .articles-list {
+            margin-top: 2rem;
+        }
+        
+        .article-item {
+            background: #1a1f2a;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #2a2f3a;
+        }
+        
+        .article-title {
+            color: white;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #8a8f99;
+        }
+        
+        .sentiment-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .tag-bullish {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+        }
+        
+        .tag-bearish {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
+        
+        .tag-neutral {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .market-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+        
+        /* Refresh Button */
+        .refresh-btn {
+            background: #1e2430;
+            border: 1px solid #2a2f3a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #2a2f3a;
+            border-color: #4a9eff;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #5a5f69;
+            border-top: 1px solid #2a2f3a;
+            margin-top: 3rem;
+        }
+        
+        .footer a {
+            color: #4a9eff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">📊 MarketSentiment</div>
+            <div class="update-time">
+                <span class="live-badge">LIVE</span>
+                <span id="lastUpdate">Memuat...</span>
+                <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Market Sentiment Overview</h1>
+            <p>Real-time sentiment analysis from financial news and social media</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-label">Total Pairs</div>
+                <div class="stat-value" id="totalPairs">0</div>
+                <div class="stat-trend">Major forex pairs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Most Bullish</div>
+                <div class="stat-value" id="mostBullish">-</div>
+                <div class="stat-trend" id="mostBullishValue">0% Buy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Most Bearish</div>
+                <div class="stat-value" id="mostBearish">-</div>
+                <div class="stat-trend" id="mostBearishValue">0% Sell</div>
+            </div>
+        </div>
+
+        <!-- Market Grid -->
+        <div id="marketGrid" class="market-grid">
+            <!-- Akan diisi JavaScript -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Memuat data pasar...</p>
+        </div>
+    </div>
+
+    <!-- Modal Detail -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content" id="modalContent">
+            <!-- Akan diisi JavaScript -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Data sourced from Alpha Vantage API • Updated every 5 minutes</p>
+        <p>Created with ❤️ for forex traders</p>
+    </div>
+
+    <script>
+        // State
+        let marketData = null;
+        let autoRefreshInterval = null;
+
+        // DOM Elements
+        const marketGrid = document.getElementById('marketGrid');
+        const loadingEl = document.getElementById('loading');
+        const lastUpdateEl = document.getElementById('lastUpdate');
+        const totalPairsEl = document.getElementById('totalPairs');
+        const mostBullishEl = document.getElementById('mostBullish');
+        const mostBullishValueEl = document.getElementById('mostBullishValue');
+        const mostBearishEl = document.getElementById('mostBearish');
+        const mostBearishValueEl = document.getElementById('mostBearishValue');
+        const detailModal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+
+        // Fetch data dari backend
+        async function fetchMarketData() {
+            try {
+                const response = await fetch('/api/sentiment');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Update UI dengan data terbaru
+        function updateUI(data) {
+            if (!data || !data.pairs) return;
+
+            marketData = data;
+            
+            // Update last update time
+            lastUpdateEl.textContent = `Last update: ${data.last_update || new Date().toLocaleTimeString()}`;
+            
+            // Update stats
+            totalPairsEl.textContent = data.total_pairs || data.pairs.length;
+            
+            // Find most bullish and bearish
+            let mostBullish = null;
+            let mostBearish = null;
+            
+            data.pairs.forEach(pair => {
+                if (!mostBullish || pair.sentiment.buy > mostBullish.sentiment.buy) {
+                    mostBullish = pair;
+                }
+                if (!mostBearish || pair.sentiment.sell > mostBearish.sentiment.sell) {
+                    mostBearish = pair;
+                }
+            });
+            
+            if (mostBullish) {
+                mostBullishEl.textContent = mostBullish.symbol;
+                mostBullishValueEl.textContent = `${mostBullish.sentiment.buy}% Buy`;
+            }
+            
+            if (mostBearish) {
+                mostBearishEl.textContent = mostBearish.symbol;
+                mostBearishValueEl.textContent = `${mostBearish.sentiment.sell}% Sell`;
+            }
+            
+            // Render market grid
+            renderMarketGrid(data.pairs);
+            
+            // Hide loading
+            loadingEl.style.display = 'none';
+        }
+
+        // Render grid market cards
+        function renderMarketGrid(pairs) {
+            let html = '';
+            
+            pairs.forEach(pair => {
+                const s = pair.sentiment;
+                const directionClass = pair.direction === 'BULLISH' ? 'badge-bullish' : 
+                                      pair.direction === 'BEARISH' ? 'badge-bearish' : 'badge-neutral';
+                
+                // Generate news ticker
+                const tickerText = pair.headlines && pair.headlines.length > 0 
+                    ? pair.headlines.map(h => h.title).join(' • ')
+                    : 'No recent news';
+                
+                html += `
+                    <div class="market-card" onclick="showDetail('${pair.symbol}')">
+                        <div class="card-header">
+                            <div class="pair-info">
+                                <h3>${pair.symbol}</h3>
+                                <div class="pair-name">${pair.name}</div>
+                            </div>
+                            <div class="price">
+                                <div class="price-value">${pair.price.toFixed(4)}</div>
+                                <div class="price-change">${pair.direction}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sentiment-container">
+                            <div class="sentiment-bar">
+                                <div class="bar-buy" style="width: ${s.buy}%"></div>
+                                <div class="bar-sell" style="width: ${s.sell}%"></div>
+                                <div class="bar-sideways" style="width: ${s.sideways}%"></div>
+                            </div>
+                            <div class="sentiment-labels">
+                                <span class="label-buy">Buy ${s.buy}%</span>
+                                <span class="label-sell">Sell ${s.sell}%</span>
+                                <span class="label-sideways">Side ${s.sideways}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="direction-badge ${directionClass}">
+                            ${pair.direction} Sentiment
+                        </div>
+                        
+                        <div class="news-ticker">
+                            <div class="ticker-content">📰 ${tickerText}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            marketGrid.innerHTML = html;
+        }
+
+        // Show detail modal untuk pair tertentu
+        async function showDetail(symbol) {
+            try {
+                const response = await fetch(`/api/sentiment/${symbol}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Data tidak tersedia');
+                    return;
+                }
+                
+                const s = data.sentiment;
+                
+                let articlesHtml = '';
+                if (data.articles && data.articles.length > 0) {
+                    data.articles.forEach(article => {
+                        const sentimentClass = article.sentiment_label === 'Bullish' ? 'tag-bullish' :
+                                             article.sentiment_label === 'Bearish' ? 'tag-bearish' : 'tag-neutral';
+                        
+                        articlesHtml += `
+                            <div class="article-item">
+                                <div class="article-title">${article.title}</div>
+                                <div class="article-meta">
+                                    <span>${article.source}</span>
+                                    <span>${article.time}</span>
+                                    <span class="sentiment-tag ${sentimentClass}">${article.sentiment_label}</span>
+                                </div>
+                                <div style="color: #8a8f99; font-size: 0.9rem; margin-top: 0.5rem;">
+                                    ${article.summary}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    articlesHtml = '<p style="color: #8a8f99; text-align: center;">Tidak ada berita tersedia</p>';
+                }
+                
+                modalContent.innerHTML = `
+                    <div class="modal-header">
+                        <h2 style="color: white;">${data.name} (${data.symbol})</h2>
+                        <button class="close-btn" onclick="closeModal()">&times;</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">Market Price</h3>
+                            <div style="font-size: 2.5rem; color: white;">${data.price.toFixed(4)}</div>
+                            <div style="color: #8a8f99; margin-top: 0.5rem;">Last update: ${data.last_update}</div>
+                        </div>
+                        
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">Sentiment Breakdown</h3>
+                            <div style="background: #1a1f2a; padding: 1.5rem; border-radius: 12px;">
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <span style="color: #4ade80;">Buy</span>
+                                        <span style="color: white;">${s.buy}%</span>
+                                    </div>
+                                    <div style="height: 8px; background: #2a2f3a; border-radius: 4px;">
+                                        <div style="width: ${s.buy}%; height: 100%; background: #4ade80; border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <span style="color: #f87171;">Sell</span>
+                                        <span style="color: white;">${s.sell}%</span>
+                                    </div>
+                                    <div style="height: 8px; background: #2a2f3a; border-radius: 4px;">
+                                        <div style="width: ${s.sell}%; height: 100%; background: #f87171; border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <span style="color: #fbbf24;">Sideways</span>
+                                        <span style="color: white;">${s.sideways}%</span>
+                                    </div>
+                                    <div style="height: 8px; background: #2a2f3a; border-radius: 4px;">
+                                        <div style="width: ${s.sideways}%; height: 100%; background: #fbbf24; border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: white; margin-bottom: 1rem;">Latest News & Analysis</h3>
+                    <div class="articles-list">
+                        ${articlesHtml}
+                    </div>
+                `;
+                
+                detailModal.classList.add('active');
+            } catch (error) {
+                console.error('Error fetching detail:', error);
+                alert('Gagal memuat detail');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            detailModal.classList.remove('active');
+        }
+
+        // Refresh data
+        async function refreshData() {
+            loadingEl.style.display = 'block';
+            marketGrid.innerHTML = '';
+            
+            const data = await fetchMarketData();
+            if (data) {
+                updateUI(data);
+            } else {
+                loadingEl.innerHTML = '<p>Gagal memuat data. Coba lagi nanti.</p>';
+            }
+        }
+
+        // Auto refresh setiap 5 menit
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            autoRefreshInterval = setInterval(refreshData, 5 * 60 * 1000);
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            if (event.target === detailModal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        async function init() {
+            await refreshData();
+            startAutoRefresh();
+        }
+
+        init();
+    </script>
+</body>
+</html>
