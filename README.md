@@ -40,7 +40,7 @@ Aplikasi web real-time untuk melihat sentimen pasar forex dan emas berdasarkan a
 ![Main View](preview.png)
 
 ### Detail Pair
-![Detail View](https://via.placeholder.com/800x400?text=Pair+Detail+View)
+![Detail View](detail.png)
 
 ## 🛠 Teknologi
 
@@ -336,10 +336,8 @@ heroku config:set ALPHA_VANTAGE_KEY=your_key
 
 ## 📞 Kontak
 
-- **Nama**: [Nama Anda]
-- **Email**: [email@example.com]
-- **GitHub**: [github.com/username](https://github.com/username)
-- **LinkedIn**: [linkedin.com/in/username](https://linkedin.com/in/username)
+- **Nama**: [Muhammad ILham]
+- **GitHub**: [github.com/username](https://github.com/IlhamXkyo)
 
 ## 🙏 Credit
 
