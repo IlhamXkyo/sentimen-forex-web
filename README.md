@@ -343,7 +343,8 @@ heroku config:set ALPHA_VANTAGE_KEY=your_key
 
 - **Alpha Vantage** - Penyedia API data finansial
 - **Flask** - Web framework
-- **Font Awesome** - Icons (jika digunakan)
+- **Font Awesome** 
+- **IlhamXkyo** - web developer
 
 ---
 
